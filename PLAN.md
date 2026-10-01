@@ -1,0 +1,142 @@
+# Fundi: Product & Build Plan
+
+> Working name. "Fundi" is the SA word for a skilled tradesperson. Easy to rename later.
+
+A directory of local service providers in South Africa (plumbers, electricians,
+solar installers, gate motor techs, cleaners, etc.). Customers search by service
+and area, compare **prices** and **ratings**, then contact the provider directly
+by **phone or WhatsApp**. Providers list themselves for free and publish their
+prices, which keeps pricing transparent and competitive.
+
+---
+
+## 1. Goals
+
+| For customers | For providers |
+| --- | --- |
+| Find someone trustworthy, nearby, fast | Get found by local customers for free |
+| Know what a fair price is *before* calling | Show off reviews and credentials |
+| Contact directly. No middleman, no booking fee | Get leads straight to their phone or WhatsApp |
+
+**Out of scope for the MVP:** in-app payments, booking calendars, escrow, chat. These are big
+builds, and in SA most work is arranged over WhatsApp anyway.
+
+## 2. Core features (MVP)
+
+1. **Browse & search** by category, keyword, province or city, minimum rating and max price. Sort by rating, reviews or price.
+2. **Provider profiles** with bio, verified badge, years of experience, area served, and services with prices.
+3. **Price transparency**
+   - Every service has a price and a unit: fixed, from, per hour, call-out fee, or per m².
+   - Each price is compared with the average for the same service ("12% below avg").
+   - A "What should it cost?" page shows min, average and max prices per service in each category.
+   - Reviews can record what the customer **actually paid**.
+4. **Ratings & reviews**: 1–5 stars, a comment, and optionally the service used and price paid.
+5. **Contact**: tap to call, or WhatsApp with a pre-filled message (`wa.me`).
+6. **Provider sign-up**: a 4-step form (about you, services & prices, area, confirm with POPIA consent).
+
+## 3. SA-specific considerations
+
+- **Currency:** ZAR, whole rands, formatted `en-ZA`.
+- **Phone numbers:** accept `082…`, `27…` and `+27…`, and store as E.164 (`+27821234567`).
+- **WhatsApp first:** the main way people contact tradespeople.
+- **Call-out fees** are standard, so they are a first-class price unit.
+- **Load-shedding:** Solar & Inverters and Gate Motors are top-level categories.
+- **Mobile-first:** most users are on phones and some on low-end devices or expensive data. Keep the bundle small and the app installable as a PWA.
+- **POPIA:** providers explicitly consent to their contact details being published. Add a privacy policy, data deletion on request, and an Information Officer before launch.
+- **Trust signals:** professional registrations (PIRB for plumbers, ECSA/DoEL for electricians, SAPCA for pest control) can be verified manually to earn the "Verified" badge.
+- **Languages:** English first, with Afrikaans/isiZulu/isiXhosa later (i18n-ready strings).
+
+## 4. Data model
+
+```
+categories        id, name, icon, description
+providers         id, user_id, name, business_name, bio, phone, whatsapp,
+                  province, city, suburbs[], years_experience, verified,
+                  available_24h, rating_avg, rating_count, created_at
+provider_categories  provider_id, category_id
+services          id, provider_id, category_id, name, price, unit
+reviews           id, provider_id, author_user_id, rating, comment,
+                  service_name, price_paid, created_at, status
+users             id, phone (OTP login), display_name, role (customer|provider|admin)
+reports           id, target_type, target_id, reason, created_at   (moderation)
+```
+
+`rating_avg` / `rating_count` are denormalised (updated by trigger) so listings sort fast.
+
+TypeScript mirror: `web/src/types/index.ts`.
+
+## 5. Tech stack
+
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Frontend | React + TypeScript + Vite + Tailwind | Fast, small, easy to hire for |
+| Routing | React Router | Simple SPA routes |
+| Backend (Phase 2) | **Supabase** (Postgres, Auth, Storage, Row-Level Security) | Managed, cheap free tier, SQL, phone OTP auth built in |
+| Search (later) | Postgres full-text + PostGIS for "near me" | No extra infrastructure until it's needed |
+| Hosting | Vercel / Netlify / Cloudflare Pages | Free tier, global CDN |
+| Mobile | PWA first, then Capacitor/React Native if needed | One codebase |
+
+The UI never touches data directly. Everything goes through `web/src/lib/api.ts`,
+so swapping the in-memory mock for Supabase is a one-file change.
+
+## 6. Phased build
+
+### ✅ Phase 0: Plan (this document)
+
+### ✅ Phase 1: UI skeleton with mock data (done)
+- [x] Project scaffold (Vite, React, TS, Tailwind)
+- [x] Domain types and a mock data layer (`lib/api.ts`), with new providers and reviews saved in localStorage
+- [x] Home: search, category grid, top rated
+- [x] Search/browse with filters and sorting, synced to the URL so results can be shared
+- [x] Provider profile with price-vs-market badges, reviews, and a review form
+- [x] "What should it cost?" price comparison page
+- [x] Provider sign-up wizard with SA phone validation and POPIA consent
+- [x] Mobile layout with a fixed Call/WhatsApp bar
+
+### Phase 2: Real backend
+- [ ] Supabase project, SQL migrations for the schema above, seed categories
+- [ ] Row-Level Security: anyone can read; providers edit only their own listing; reviewers edit only their own reviews
+- [ ] Phone OTP login (SMS) for providers and reviewers
+- [ ] Replace `lib/api.ts` internals with Supabase queries; add TanStack Query for caching
+- [ ] Provider dashboard: edit profile, prices, and availability
+- [ ] Profile photo and work-gallery uploads (Storage)
+
+### Phase 3: Trust & quality
+- [ ] One review per user per provider; reviewers must be logged in with a verified phone
+- [ ] Report or flag reviews and listings, plus an admin moderation queue
+- [ ] Verification flow: upload registration/ID, admin approves, "Verified" badge
+- [ ] Providers can reply to reviews
+- [ ] Standard service names per category, so price comparisons group correctly (sign-up already suggests existing names)
+
+### Phase 4: Location & discovery
+- [ ] Geolocation "near me" with PostGIS distance sorting
+- [ ] Suburb autocomplete
+- [ ] SEO pages, e.g. `/plumbers/johannesburg/sandton` (server-rendered or prerendered)
+- [ ] PWA: installable, offline shell, low-data mode
+
+### Phase 5: Launch & monetisation
+- [ ] Soft launch in **one metro** (e.g. Johannesburg East or Cape Town Northern Suburbs) and onboard 50–100 providers by hand
+- [ ] Analytics (privacy-friendly), lead tracking (how many call/WhatsApp taps each provider gets)
+- [ ] Revenue options (customers always free):
+  - Featured / top-of-list placement
+  - "Pro" subscription: more photos, lead stats, verified badge fast-track
+  - Lead notifications by SMS/WhatsApp Business API
+- [ ] POPIA compliance pack: privacy policy, T&Cs, data deletion request flow
+
+## 7. Open questions
+
+1. **Name & branding:** keep "Fundi" or pick another?
+2. **Launch area:** which city or suburbs first?
+3. **Reviews:** require a logged-in phone number (fewer fake reviews), or allow anonymous reviews?
+4. **Prices:** should providers be *required* to list a call-out fee?
+5. **Monetisation timing:** free for the first X months to build supply?
+
+## 8. Running the prototype
+
+```bash
+cd web
+npm install
+npm run dev     # http://localhost:5173
+npm run build   # typecheck + production build
+npm run lint
+```
