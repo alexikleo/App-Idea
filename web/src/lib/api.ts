@@ -3,12 +3,14 @@
 // in /PLAN.md) without touching components.
 
 import { MOCK_PROVIDERS, MOCK_REVIEWS } from '../data/mockProviders'
-import type { Provider, ProviderSearch, Review, ServiceOffering } from '../types'
+import type { Province, Provider, ProviderSearch, Review, ReviewTag, ServiceOffering } from '../types'
 
 const STORAGE_KEY = 'fundi:local-data:v1'
 
+type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags'>
+
 interface LocalData {
-  providers: Omit<Provider, 'ratingAvg' | 'ratingCount'>[]
+  providers: SeedProvider[]
   reviews: Review[]
 }
 
@@ -22,11 +24,13 @@ function loadLocal(): LocalData {
   return { providers: [], reviews: [] }
 }
 
-function saveLocal(data: LocalData) {
+function saveLocal(data: LocalData): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    return true
   } catch {
-    // Ignore; data just won't persist across reloads.
+    // Storage full or unavailable; data just won't persist across reloads.
+    return false
   }
 }
 
@@ -42,7 +46,14 @@ function allProviders(): Provider[] {
     const mine = reviews.filter((r) => r.providerId === p.id)
     const ratingCount = mine.length
     const ratingAvg = ratingCount ? mine.reduce((sum, r) => sum + r.rating, 0) / ratingCount : 0
-    return { ...p, ratingAvg, ratingCount }
+    const tagCounts = new Map<ReviewTag, number>()
+    for (const tag of mine.flatMap((r) => r.tags ?? [])) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+    const topTags = [...tagCounts.entries()]
+      .filter(([, n]) => n >= 2 || ratingCount <= 2)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([tag]) => tag)
+    return { ...p, ratingAvg, ratingCount, topTags }
   })
 }
 
@@ -121,11 +132,15 @@ export async function addReview(review: Omit<Review, 'id' | 'createdAt'>): Promi
     createdAt: new Date().toISOString().slice(0, 10),
   }
   local.reviews.push(created)
-  saveLocal(local)
+  if (!saveLocal(local)) {
+    // Photos can exceed the browser storage quota; keep the review, drop the photos.
+    created.photos = undefined
+    saveLocal(local)
+  }
   return delay(created)
 }
 
-export type NewProvider = Omit<Provider, 'id' | 'ratingAvg' | 'ratingCount' | 'verified' | 'joinedAt'>
+export type NewProvider = Omit<SeedProvider, 'id' | 'verified' | 'joinedAt'>
 
 export async function createProvider(input: NewProvider): Promise<Provider> {
   const seed = {
@@ -136,7 +151,7 @@ export async function createProvider(input: NewProvider): Promise<Provider> {
   }
   local.providers.push(seed)
   saveLocal(local)
-  return delay({ ...seed, ratingAvg: 0, ratingCount: 0 })
+  return delay({ ...seed, ratingAvg: 0, ratingCount: 0, topTags: [] })
 }
 
 export interface PriceStat {
@@ -177,4 +192,47 @@ export function priceStatsSync(categoryId: string): PriceStat[] {
 
 export async function listCities(): Promise<string[]> {
   return delay([...new Set(allProviders().map((p) => p.location.city))].sort(), 0)
+}
+
+export async function getProvidersByIds(ids: string[]): Promise<Provider[]> {
+  const all = allProviders()
+  return delay(ids.map((id) => all.find((p) => p.id === id)).filter((p): p is Provider => !!p))
+}
+
+/** 24/7 providers for an emergency, best rated first. */
+export async function listEmergencyProviders(categoryId: string, province?: Province): Promise<Provider[]> {
+  return delay(
+    allProviders()
+      .filter((p) => p.available24h && p.categoryIds.includes(categoryId))
+      .filter((p) => !province || p.location.province === province)
+      .sort((a, b) => b.ratingAvg - a.ratingAvg || b.ratingCount - a.ratingCount),
+  )
+}
+
+export type QuoteVerdict = 'below_market' | 'good' | 'fair' | 'high' | 'very_high'
+
+export interface QuoteCheck {
+  stat: PriceStat
+  amount: number
+  /** Fraction above (+) or below (-) the average. */
+  diff: number
+  verdict: QuoteVerdict
+  /** Rated providers listing this service for less than the quote. */
+  cheaper: { provider: Provider; service: ServiceOffering }[]
+}
+
+export async function checkQuote(categoryId: string, serviceName: string, amount: number): Promise<QuoteCheck | undefined> {
+  const stat = priceStatsSync(categoryId).find((s) => s.serviceName === serviceName)
+  if (!stat || amount <= 0) return delay(undefined)
+  const diff = (amount - stat.avg) / stat.avg
+  const verdict: QuoteVerdict =
+    amount < stat.min * 0.85 ? 'below_market' : diff <= -0.08 ? 'good' : diff <= 0.1 ? 'fair' : diff <= 0.3 ? 'high' : 'very_high'
+  const cheaper = allProviders()
+    .flatMap((provider) =>
+      provider.services
+        .filter((s) => s.categoryId === categoryId && s.name === serviceName && s.price > 0 && s.price < amount)
+        .map((service) => ({ provider, service })),
+    )
+    .sort((a, b) => a.service.price - b.service.price || b.provider.ratingAvg - a.provider.ratingAvg)
+  return delay({ stat, amount, diff, verdict, cheaper }, 350)
 }

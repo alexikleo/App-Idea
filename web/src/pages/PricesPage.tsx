@@ -1,5 +1,7 @@
+import { ArrowRight, BarChart3, Calculator } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { EmptyState, Loading } from '../components/States'
+import CategoryIcon from '../components/CategoryIcon'
+import { EmptyState } from '../components/States'
 import { CATEGORIES, getCategory } from '../data/categories'
 import { getPriceStats } from '../lib/api'
 import { formatRand } from '../lib/format'
@@ -13,64 +15,72 @@ export default function PricesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <h1 className="text-2xl font-bold">📊 What should it cost?</h1>
-      <p className="mt-1 text-slate-600">
-        Typical prices listed by providers on Fundi. Use this to check a quote is fair before you agree to it.
+      <h1 className="text-3xl font-extrabold">What should it cost?</h1>
+      <p className="mt-1 max-w-prose text-muted">
+        Typical prices listed by fundis on Fundi. Use this to check a quote before you agree to it.
       </p>
 
-      <div className="mt-6 flex gap-2 overflow-x-auto pb-2">
+      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         {CATEGORIES.map((c) => (
           <button
             key={c.id}
             onClick={() => setParams({ category: c.id }, { replace: true })}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
-              c.id === categoryId
-                ? 'border-brand-600 bg-brand-600 text-white'
-                : 'border-slate-300 bg-white text-slate-700 hover:border-brand-500'
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+              c.id === categoryId ? 'border-brand-600 bg-brand-600 text-white' : 'border-line bg-surface hover:border-brand-500'
             }`}
           >
-            {c.icon} {c.name}
+            <CategoryIcon id={c.id} className="size-4" />
+            {c.name}
           </button>
         ))}
       </div>
 
-      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-6">
+      <section className="card mt-4 p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-bold">{category?.name ?? 'Unknown'} prices</h2>
-          <Link to={`/services?category=${categoryId}&sort=price_low`} className="text-sm font-medium text-brand-700 hover:underline">
-            Find cheapest {category?.name.toLowerCase()} →
+          <h2 className="text-xl font-bold">{category?.name ?? 'Unknown'} prices</h2>
+          <Link
+            to={`/services?category=${categoryId}&sort=price_low`}
+            className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 hover:underline"
+          >
+            Cheapest {category?.name.toLowerCase()} first <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>
         {loading ? (
-          <Loading />
+          <div className="mt-5 space-y-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="skeleton h-12 w-full" />
+            ))}
+          </div>
         ) : !stats?.length ? (
           <div className="mt-4">
-            <EmptyState title="Not enough price data yet">Prices appear here once providers list them.</EmptyState>
+            <EmptyState icon={BarChart3} title="Not enough price data yet">
+              Prices appear here once fundis in this category list them.
+            </EmptyState>
           </div>
         ) : (
-          <ul className="mt-4 space-y-5">
+          <ul className="mt-5 space-y-6">
             {stats.map((s) => {
               const span = s.max - s.min || 1
               const avgPos = ((s.avg - s.min) / span) * 100
               return (
                 <li key={s.serviceName}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-medium">{s.serviceName}</p>
-                    <p className="text-sm text-slate-500">
-                      avg <span className="font-bold text-slate-900">{formatRand(s.avg)}</span> · {s.count} provider
-                      {s.count === 1 ? '' : 's'}
+                    <p className="font-semibold">{s.serviceName}</p>
+                    <p className="text-sm text-muted">
+                      avg <span className="font-display text-lg font-bold tabular-nums text-ink">{formatRand(s.avg)}</span> ·{' '}
+                      {s.count} fundi{s.count === 1 ? '' : 's'}
                     </p>
                   </div>
-                  <div className="relative mt-2 h-2 rounded-full bg-gradient-to-r from-brand-500 via-accent-400 to-red-400">
+                  <div className="relative mt-2 h-2.5 rounded-full bg-gradient-to-r from-brand-500 via-marigold-400 to-alert-500">
                     {s.count > 1 && (
                       <span
-                        className="absolute -top-1 h-4 w-1 rounded bg-slate-900"
-                        style={{ left: `calc(${avgPos}% - 2px)` }}
+                        className="absolute -top-1 h-4.5 w-1.5 rounded-full bg-ink ring-2 ring-surface"
+                        style={{ left: `calc(${avgPos}% - 3px)` }}
                         title="Average"
                       />
                     )}
                   </div>
-                  <div className="mt-1 flex justify-between text-xs text-slate-500">
+                  <div className="mt-1 flex justify-between text-xs tabular-nums text-muted">
                     <span>{formatRand(s.min)}</span>
                     <span>{formatRand(s.max)}</span>
                   </div>
@@ -80,6 +90,15 @@ export default function PricesPage() {
           </ul>
         )}
       </section>
+
+      <Link
+        to={`/check?category=${categoryId}`}
+        className="card mt-4 flex items-center gap-3 p-4 transition hover:border-brand-500"
+      >
+        <Calculator className="size-6 text-marigold-500" aria-hidden />
+        <span className="flex-1 font-semibold">Got a quote? Check if it’s fair</span>
+        <ArrowRight className="size-5 text-faint" aria-hidden />
+      </Link>
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import type { Provider, Review } from '../types'
 
 // Sample data for the UI skeleton only. Names and numbers are fictional.
-// ratingAvg / ratingCount are recomputed from MOCK_REVIEWS in the data layer.
+// ratingAvg / ratingCount / topTags are recomputed from MOCK_REVIEWS in the data layer.
 
-type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount'>
+type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags'>
 
 export const MOCK_PROVIDERS: SeedProvider[] = [
   {
@@ -197,23 +197,23 @@ export const MOCK_PROVIDERS: SeedProvider[] = [
 ]
 
 export const MOCK_REVIEWS: Review[] = [
-  { id: 'r1', providerId: 'p1', authorName: 'Megan R.', rating: 5, comment: 'Geyser burst on a Sunday and Sipho was here within the hour. Neat work and fair price.', serviceName: 'Geyser replacement (150L)', pricePaid: 7900, createdAt: '2026-08-14' },
-  { id: 'r2', providerId: 'p1', authorName: 'Themba M.', rating: 5, comment: 'Very professional, explained everything before starting.', createdAt: '2026-07-30' },
-  { id: 'r3', providerId: 'p1', authorName: 'Carol V.', rating: 4, comment: 'Good job on the drain, arrived a bit late.', serviceName: 'Blocked drain', pricePaid: 700, createdAt: '2026-06-02' },
-  { id: 'r4', providerId: 'p2', authorName: 'Andre P.', rating: 5, comment: 'Sorted our COC in a day so the house transfer could go through. Highly recommend.', serviceName: 'Certificate of Compliance (COC)', pricePaid: 2400, createdAt: '2026-08-20' },
-  { id: 'r5', providerId: 'p2', authorName: 'Zanele K.', rating: 4, comment: 'Knows his stuff. Pricier than others but quality work.', createdAt: '2026-05-11' },
-  { id: 'r6', providerId: 'p3', authorName: 'Priya S.', rating: 5, comment: 'Flat was spotless for our move-out inspection. Got the full deposit back!', serviceName: 'Deep clean / move-out', pricePaid: 1800, createdAt: '2026-08-01' },
-  { id: 'r7', providerId: 'p3', authorName: 'Liam O.', rating: 4, comment: 'Friendly team, good value.', createdAt: '2026-07-07' },
-  { id: 'r8', providerId: 'p4', authorName: 'Busi N.', rating: 4, comment: 'Mounted two TVs and built a cupboard. Fair rate.', createdAt: '2026-08-25' },
-  { id: 'r9', providerId: 'p4', authorName: 'Greg T.', rating: 3, comment: 'Work was fine but took longer than quoted.', createdAt: '2026-07-19' },
-  { id: 'r10', providerId: 'p5', authorName: 'Shaun D.', rating: 5, comment: 'No more load-shedding stress. Clean install, sorted the municipal paperwork too.', serviceName: '5kW hybrid system (supply & install)', pricePaid: 71000, createdAt: '2026-06-30' },
-  { id: 'r11', providerId: 'p5', authorName: 'Fatima A.', rating: 5, comment: 'Honest advice, did not oversell us.', createdAt: '2026-05-22' },
-  { id: 'r12', providerId: 'p5', authorName: 'Mark L.', rating: 4, comment: 'Great system, slight delay on battery delivery.', createdAt: '2026-04-15' },
-  { id: 'r13', providerId: 'p6', authorName: 'Jenny W.', rating: 5, comment: 'Lerato and team are always on time. Garden looks amazing.', createdAt: '2026-08-09' },
-  { id: 'r14', providerId: 'p7', authorName: 'Ravi G.', rating: 4, comment: 'Came out at 11pm for a burst pipe. Lifesaver.', createdAt: '2026-08-18' },
-  { id: 'r15', providerId: 'p7', authorName: 'Sandra B.', rating: 5, comment: 'Cheapest geyser quote I got and excellent work.', serviceName: 'Geyser replacement (150L)', pricePaid: 7200, createdAt: '2026-07-03' },
-  { id: 'r16', providerId: 'p8', authorName: 'Hennie J.', rating: 5, comment: 'Gate motor fixed same day. Very fair.', serviceName: 'Gate motor battery replacement', pricePaid: 650, createdAt: '2026-08-27' },
-  { id: 'r17', providerId: 'p8', authorName: 'Lindiwe P.', rating: 5, comment: 'Locked out at night, he came within 30 min.', createdAt: '2026-06-12' },
-  { id: 'r18', providerId: 'p9', authorName: 'Owen F.', rating: 5, comment: 'Quick, tidy and affordable.', createdAt: '2026-08-03' },
-  { id: 'r19', providerId: 'p10', authorName: 'Kagiso M.', rating: 3, comment: 'Treatment worked but had to call twice to book.', createdAt: '2026-08-11' },
+  { id: 'r1', providerId: 'p1', authorName: 'Megan R.', rating: 5, comment: 'Geyser burst on a Sunday and Sipho was here within the hour. Neat work and fair price.', serviceName: 'Geyser replacement (150L)', pricePaid: 7900, tags: ['on_time','quality','fair_price'], createdAt: '2026-08-14' },
+  { id: 'r2', providerId: 'p1', authorName: 'Themba M.', rating: 5, comment: 'Very professional, explained everything before starting.', tags: ['communication','friendly'], createdAt: '2026-07-30' },
+  { id: 'r3', providerId: 'p1', authorName: 'Carol V.', rating: 4, comment: 'Good job on the drain, arrived a bit late.', serviceName: 'Blocked drain', pricePaid: 700, tags: ['quality'], createdAt: '2026-06-02' },
+  { id: 'r4', providerId: 'p2', authorName: 'Andre P.', rating: 5, comment: 'Sorted our COC in a day so the house transfer could go through. Highly recommend.', serviceName: 'Certificate of Compliance (COC)', pricePaid: 2400, tags: ['on_time','communication','quality'], createdAt: '2026-08-20' },
+  { id: 'r5', providerId: 'p2', authorName: 'Zanele K.', rating: 4, comment: 'Knows his stuff. Pricier than others but quality work.', tags: ['quality'], createdAt: '2026-05-11' },
+  { id: 'r6', providerId: 'p3', authorName: 'Priya S.', rating: 5, comment: 'Flat was spotless for our move-out inspection. Got the full deposit back!', serviceName: 'Deep clean / move-out', pricePaid: 1800, tags: ['tidy','quality','on_time'], createdAt: '2026-08-01' },
+  { id: 'r7', providerId: 'p3', authorName: 'Liam O.', rating: 4, comment: 'Friendly team, good value.', tags: ['friendly','fair_price'], createdAt: '2026-07-07' },
+  { id: 'r8', providerId: 'p4', authorName: 'Busi N.', rating: 4, comment: 'Mounted two TVs and built a cupboard. Fair rate.', tags: ['fair_price','friendly'], createdAt: '2026-08-25' },
+  { id: 'r9', providerId: 'p4', authorName: 'Greg T.', rating: 3, comment: 'Work was fine but took longer than quoted.', tags: ['friendly'], createdAt: '2026-07-19' },
+  { id: 'r10', providerId: 'p5', authorName: 'Shaun D.', rating: 5, comment: 'No more load-shedding stress. Clean install, sorted the municipal paperwork too.', serviceName: '5kW hybrid system (supply & install)', pricePaid: 71000, tags: ['quality','communication','tidy'], createdAt: '2026-06-30' },
+  { id: 'r11', providerId: 'p5', authorName: 'Fatima A.', rating: 5, comment: 'Honest advice, did not oversell us.', tags: ['communication','fair_price'], createdAt: '2026-05-22' },
+  { id: 'r12', providerId: 'p5', authorName: 'Mark L.', rating: 4, comment: 'Great system, slight delay on battery delivery.', tags: ['quality'], createdAt: '2026-04-15' },
+  { id: 'r13', providerId: 'p6', authorName: 'Jenny W.', rating: 5, comment: 'Lerato and team are always on time. Garden looks amazing.', tags: ['on_time','tidy','friendly'], createdAt: '2026-08-09' },
+  { id: 'r14', providerId: 'p7', authorName: 'Ravi G.', rating: 4, comment: 'Came out at 11pm for a burst pipe. Lifesaver.', tags: ['on_time'], createdAt: '2026-08-18' },
+  { id: 'r15', providerId: 'p7', authorName: 'Sandra B.', rating: 5, comment: 'Cheapest geyser quote I got and excellent work.', serviceName: 'Geyser replacement (150L)', pricePaid: 7200, tags: ['fair_price','quality'], createdAt: '2026-07-03' },
+  { id: 'r16', providerId: 'p8', authorName: 'Hennie J.', rating: 5, comment: 'Gate motor fixed same day. Very fair.', serviceName: 'Gate motor battery replacement', pricePaid: 650, tags: ['on_time','fair_price'], createdAt: '2026-08-27' },
+  { id: 'r17', providerId: 'p8', authorName: 'Lindiwe P.', rating: 5, comment: 'Locked out at night, he came within 30 min.', tags: ['on_time','friendly'], createdAt: '2026-06-12' },
+  { id: 'r18', providerId: 'p9', authorName: 'Owen F.', rating: 5, comment: 'Quick, tidy and affordable.', tags: ['on_time','tidy','fair_price'], createdAt: '2026-08-03' },
+  { id: 'r19', providerId: 'p10', authorName: 'Kagiso M.', rating: 3, comment: 'Treatment worked but had to call twice to book.', tags: ['quality'], createdAt: '2026-08-11' },
 ]

@@ -15,7 +15,6 @@ export type Province =
 export interface Category {
   id: string
   name: string
-  icon: string
   description: string
 }
 
@@ -55,6 +54,8 @@ export interface Provider {
   /** Denormalised from reviews for fast listing/sorting. */
   ratingAvg: number
   ratingCount: number
+  /** Most common review tags, most frequent first. */
+  topTags: ReviewTag[]
 }
 
 export interface Review {
@@ -65,8 +66,13 @@ export interface Review {
   comment: string
   serviceName?: string
   pricePaid?: number
+  tags?: ReviewTag[]
+  /** Data URLs in the prototype; storage URLs once a backend exists. */
+  photos?: string[]
   createdAt: string
 }
+
+export type ReviewTag = 'on_time' | 'tidy' | 'fair_price' | 'communication' | 'quality' | 'friendly'
 
 export type SortOption = 'rating' | 'price_low' | 'price_high' | 'reviews'
 

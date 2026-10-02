@@ -93,6 +93,25 @@ so swapping the in-memory mock for Supabase is a one-file change.
 - [x] Provider sign-up wizard with SA phone validation and POPIA consent
 - [x] Mobile layout with a fixed Call/WhatsApp bar
 
+### ✅ Phase 1.5: Look, feel & standout features (done)
+- [x] Brand refresh: logo, self-hosted fonts, palette, icon set, skeleton loaders, page transitions
+- [x] App-style bottom tab bar on phones; filters fold away on mobile search
+- [x] **"Is my quote fair?" checker**: verdict vs market range, cheaper rated fundis, questions to ask
+- [x] **"Need help now"**: emergency types → 24/7 fundis, "while you wait" safety steps
+- [x] Richer reviews: star breakdown, "Known for" tags, photo uploads with lightbox
+- [x] **My Fundis**: saved providers and recently viewed
+- [x] Share a provider via WhatsApp / native share / copy link
+- [x] Installable PWA: manifest, app icons, offline support, home-screen shortcuts
+- [x] Live on GitHub Pages, auto-deployed on every push
+
+### Next polish round (candidates)
+- [ ] Request quotes from several fundis at once (one job description, WhatsApp to each)
+- [ ] Compare 2–3 fundis side by side
+- [ ] Earned badges: *Top rated in {city}*, *Best value*, *Quick to respond*
+- [ ] Provider QR code / share card for bakkies and flyers
+- [ ] Profile strength meter for providers
+- [ ] Dark mode (colours are already tokens)
+
 ### Phase 2: Real backend
 - [ ] Supabase project, SQL migrations for the schema above, seed categories
 - [ ] Row-Level Security: anyone can read; providers edit only their own listing; reviewers edit only their own reviews

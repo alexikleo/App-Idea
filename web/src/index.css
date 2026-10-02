@@ -1,15 +1,120 @@
 @import "tailwindcss";
 
+/*
+  Fundi design tokens.
+  Brand: deep bottle green (trust, trade) with a marigold accent (SA sunshine,
+  hi-vis workwear). Neutrals lean slightly green so nothing reads as default grey.
+*/
 @theme {
-  --color-brand-50: #ecfdf5;
-  --color-brand-100: #d1fae5;
-  --color-brand-500: #059669;
-  --color-brand-600: #047857;
-  --color-brand-700: #065f46;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-brand-50: #eef7f3;
+  --color-brand-100: #d5ece2;
+  --color-brand-200: #a9d7c4;
+  --color-brand-500: #1f8a6a;
+  --color-brand-600: #157256;
+  --color-brand-700: #0d4a3a;
+  --color-brand-900: #072a21;
+
+  --color-marigold-100: #fff3cf;
+  --color-marigold-300: #ffd760;
+  --color-marigold-400: #fbc531;
+  --color-marigold-500: #f2a900;
+  --color-marigold-700: #8a5a00;
+
+  --color-alert-50: #fdeeec;
+  --color-alert-500: #d93a2b;
+  --color-alert-600: #b92c1f;
+
+  --color-canvas: #f3f6f4;
+  --color-surface: #ffffff;
+  --color-ink: #11211b;
+  --color-muted: #5b6b64;
+  --color-faint: #8c9a94;
+  --color-line: #dfe7e3;
+  --color-sunken: #eaf0ed;
+
+  --animate-rise: rise 0.35s ease-out both;
+  --animate-shimmer: shimmer 1.4s linear infinite;
+  --animate-pulse-ring: pulse-ring 1.8s ease-out infinite;
+
+  @keyframes rise {
+    from { opacity: 0.4; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgb(217 58 43 / 0.45); }
+    100% { box-shadow: 0 0 0 10px rgb(217 58 43 / 0); }
+  }
 }
 
-body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  input, select, textarea {
+    @apply text-base sm:text-sm;
+  }
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-surface;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-ink outline-none transition placeholder:text-faint focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20;
+}
+
+@utility label {
+  @apply text-xs font-semibold uppercase tracking-wider text-muted;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 font-semibold transition active:scale-[0.98] disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+}
+
+@utility btn-accent {
+  @apply btn bg-marigold-400 text-ink hover:bg-marigold-300;
+}
+
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-sunken hover:text-ink;
+}
+
+@utility btn-outline {
+  @apply btn border border-line bg-surface text-ink hover:border-brand-500;
+}
+
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full bg-sunken px-2.5 py-1 text-xs font-medium text-muted;
+}
+
+@utility skeleton {
+  @apply animate-shimmer rounded-lg bg-[linear-gradient(90deg,var(--color-sunken)_25%,var(--color-line)_50%,var(--color-sunken)_75%)] bg-[length:200%_100%];
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
