@@ -55,7 +55,7 @@ function QuoteGauge({ check }: { check: QuoteCheck }) {
         />
         <div className="absolute -top-1 h-5 w-1 -translate-x-1/2 rounded-full bg-ink/60" style={{ left: `${pos(check.stat.avg)}%` }} />
         <div className="absolute -top-9 -translate-x-1/2 text-center" style={{ left: `${pos(check.amount)}%` }}>
-          <span className="whitespace-nowrap rounded-lg bg-ink px-2 py-1 text-xs font-bold text-white">You: {formatRand(check.amount)}</span>
+          <span className="whitespace-nowrap rounded-lg bg-ink px-2 py-1 text-xs font-bold text-canvas">You: {formatRand(check.amount)}</span>
           <span className="mx-auto mt-0.5 block size-0 border-x-4 border-t-4 border-x-transparent border-t-ink" />
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function CheckQuotePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-6">
       <div className="flex items-center gap-3">
-        <span className="grid size-12 place-items-center rounded-2xl bg-marigold-400 text-ink">
+        <span className="grid size-12 place-items-center rounded-2xl bg-marigold-400 text-brand-900">
           <Calculator className="size-6" aria-hidden />
         </span>
         <div>

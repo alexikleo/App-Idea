@@ -56,7 +56,14 @@ export interface Provider {
   ratingCount: number
   /** Most common review tags, most frequent first. */
   topTags: ReviewTag[]
+  /** Earned from ratings, prices and experience; recomputed on every read. */
+  badges: Badge[]
 }
+
+export type Badge =
+  | { kind: 'top_rated'; categoryId: string; city: string }
+  | { kind: 'best_value'; percentBelow: number }
+  | { kind: 'experienced'; years: number }
 
 export interface Review {
   id: string

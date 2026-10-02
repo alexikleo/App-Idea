@@ -1,4 +1,4 @@
-import { ArrowRight, Calculator, ChevronRight, MessageCircle, Search, ShieldCheck, Siren, Tags } from 'lucide-react'
+import { ArrowRight, Calculator, ChevronRight, MessageCircle, MessageSquareQuote, Search, ShieldCheck, Siren, Tags } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import CategoryIcon from '../components/CategoryIcon'
@@ -23,13 +23,13 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-brand-700 text-white">
+      <section className="relative overflow-hidden bg-forest text-white">
         <svg className="pointer-events-none absolute -right-24 -top-10 h-[130%] opacity-[0.07]" viewBox="0 0 64 64" aria-hidden>
           <path d="M14 31 32 16l18 15" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M24 48V36h16" fill="none" stroke="#fff" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-10 sm:pb-16 sm:pt-16">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-brand-100">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm text-white/80">
             <span className="size-2 rounded-full bg-marigold-400" /> Plumbers, sparkies, solar &amp; more, across SA
           </p>
           <h1 className="mt-4 max-w-2xl text-4xl font-extrabold leading-[1.05] sm:text-6xl">
@@ -58,7 +58,7 @@ export default function HomePage() {
                 key={p}
                 type="button"
                 onClick={() => search(p)}
-                className="rounded-full border border-white/20 px-3 py-1 text-brand-100 transition hover:bg-white/10"
+                className="rounded-full border border-white/20 px-3 py-1 text-white/80 transition hover:bg-white/10"
               >
                 {p}
               </button>
@@ -67,7 +67,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto -mt-px grid max-w-6xl gap-3 px-4 pt-6 sm:grid-cols-2">
+      <section className="mx-auto -mt-px grid max-w-6xl gap-3 px-4 pt-6 md:grid-cols-3">
         <Link
           to="/check"
           className="card group flex items-center gap-4 p-4 transition hover:border-brand-500 hover:shadow-lg hover:shadow-brand-900/5"
@@ -77,7 +77,20 @@ export default function HomePage() {
           </div>
           <div className="flex-1">
             <p className="font-display text-lg font-bold">Is my quote fair?</p>
-            <p className="text-sm text-muted">Check any quote against real local prices in seconds.</p>
+            <p className="text-sm text-muted">Check a quote against real local prices.</p>
+          </div>
+          <ChevronRight className="size-5 text-faint transition group-hover:translate-x-0.5" aria-hidden />
+        </Link>
+        <Link
+          to="/request"
+          className="card group flex items-center gap-4 p-4 transition hover:border-brand-500 hover:shadow-lg hover:shadow-brand-900/5"
+        >
+          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-100 text-brand-700">
+            <MessageSquareQuote className="size-6" aria-hidden />
+          </div>
+          <div className="flex-1">
+            <p className="font-display text-lg font-bold">Get 3 quotes</p>
+            <p className="text-sm text-muted">Describe the job once, send it to 3 fundis.</p>
           </div>
           <ChevronRight className="size-5 text-faint transition group-hover:translate-x-0.5" aria-hidden />
         </Link>
@@ -170,7 +183,7 @@ export default function HomePage() {
         <div className="mt-8 flex flex-col items-start justify-between gap-4 rounded-2xl bg-brand-900 p-6 text-white sm:flex-row sm:items-center">
           <div>
             <p className="font-display text-xl font-bold">Are you a fundi?</p>
-            <p className="text-brand-100">List your business for free and get calls from local customers.</p>
+            <p className="text-white/75">List your business for free and get calls from local customers.</p>
           </div>
           <Link to="/join" className="btn-accent shrink-0">
             List your business

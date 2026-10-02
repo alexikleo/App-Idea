@@ -3,11 +3,11 @@
 // in /PLAN.md) without touching components.
 
 import { MOCK_PROVIDERS, MOCK_REVIEWS } from '../data/mockProviders'
-import type { Province, Provider, ProviderSearch, Review, ReviewTag, ServiceOffering } from '../types'
+import type { Badge, Province, Provider, ProviderSearch, Review, ReviewTag, ServiceOffering } from '../types'
 
 const STORAGE_KEY = 'fundi:local-data:v1'
 
-type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags'>
+type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags' | 'badges'>
 
 interface LocalData {
   providers: SeedProvider[]
@@ -41,6 +41,13 @@ function allReviews(): Review[] {
 }
 
 function allProviders(): Provider[] {
+  const rated = ratedProviders()
+  return rated.map((p) => ({ ...p, badges: earnBadges(p, rated) }))
+}
+
+type RatedProvider = Omit<Provider, 'badges'>
+
+function ratedProviders(): RatedProvider[] {
   const reviews = allReviews()
   return [...MOCK_PROVIDERS, ...local.providers].map((p) => {
     const mine = reviews.filter((r) => r.providerId === p.id)
@@ -55,6 +62,45 @@ function allProviders(): Provider[] {
       .map(([tag]) => tag)
     return { ...p, ratingAvg, ratingCount, topTags }
   })
+}
+
+const TOP_RATED_MIN_REVIEWS = 2
+const TOP_RATED_MIN_AVG = 4.5
+
+/**
+ * Badges are earned, never bought:
+ * - Top rated: best-rated provider for a service in their city (min 2 reviews, 4.5+).
+ * - Best value: prices on average 5%+ below market on services others also list.
+ * - Experienced: 10+ years in the trade.
+ */
+function earnBadges(p: RatedProvider, all: RatedProvider[]): Badge[] {
+  const badges: Badge[] = []
+
+  if (p.ratingCount >= TOP_RATED_MIN_REVIEWS && p.ratingAvg >= TOP_RATED_MIN_AVG) {
+    const categoryId = p.categoryIds.find((cat) =>
+      all
+        .filter((o) => o.id !== p.id && o.location.city === p.location.city && o.categoryIds.includes(cat))
+        .every((o) => o.ratingAvg < p.ratingAvg || (o.ratingAvg === p.ratingAvg && o.ratingCount < p.ratingCount)),
+    )
+    if (categoryId) badges.push({ kind: 'top_rated', categoryId, city: p.location.city })
+  }
+
+  const diffs = p.services.flatMap((s) => {
+    const others = all
+      .filter((o) => o.id !== p.id)
+      .flatMap((o) => o.services)
+      .filter((o) => o.categoryId === s.categoryId && o.name === s.name && o.price > 0)
+    if (!others.length || s.price <= 0) return []
+    const avg = [...others, s].reduce((sum, o) => sum + o.price, 0) / (others.length + 1)
+    return [(s.price - avg) / avg]
+  })
+  if (diffs.length) {
+    const mean = diffs.reduce((a, b) => a + b, 0) / diffs.length
+    if (mean <= -0.05) badges.push({ kind: 'best_value', percentBelow: Math.round(-mean * 100) })
+  }
+
+  if (p.yearsExperience >= 10) badges.push({ kind: 'experienced', years: p.yearsExperience })
+  return badges
 }
 
 /** Simulate network latency so loading states are exercised. */
@@ -151,7 +197,7 @@ export async function createProvider(input: NewProvider): Promise<Provider> {
   }
   local.providers.push(seed)
   saveLocal(local)
-  return delay({ ...seed, ratingAvg: 0, ratingCount: 0, topTags: [] })
+  return delay({ ...seed, ratingAvg: 0, ratingCount: 0, topTags: [], badges: [] })
 }
 
 export interface PriceStat {

@@ -1,4 +1,7 @@
-import { Heart } from 'lucide-react'
+import { ChevronRight, Heart, MessageSquareQuote, Trash2 } from 'lucide-react'
+import CategoryIcon from '../components/CategoryIcon'
+import { getCategory } from '../data/categories'
+import { formatDate } from '../lib/format'
 import { Link } from 'react-router-dom'
 import ProviderCard from '../components/ProviderCard'
 import { CardSkeletons, EmptyState } from '../components/States'
@@ -7,7 +10,7 @@ import { useMyFundis } from '../lib/myFundis'
 import { useAsync } from '../lib/useAsync'
 
 export default function SavedPage() {
-  const { saved, recent, clearRecent } = useMyFundis()
+  const { saved, recent, clearRecent, requests, deleteRequest } = useMyFundis()
   const savedKey = saved.join(',')
   const recentKey = recent.filter((id) => !saved.includes(id)).join(',')
   const savedProviders = useAsync(() => getProvidersByIds(savedKey ? savedKey.split(',') : []), [savedKey])
@@ -39,6 +42,53 @@ export default function SavedPage() {
           )}
         </div>
       </section>
+
+      {requests.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-xl font-bold">Quote requests</h2>
+          <ul className="mt-3 grid gap-3 md:grid-cols-2">
+            {requests.map((r) => {
+              const done = r.sentTo.length === r.providerIds.length
+              return (
+                <li key={r.id} className="card flex items-center gap-3 p-4">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                    <CategoryIcon id={r.categoryId} className="size-5" />
+                  </span>
+                  <Link to={`/request?id=${r.id}`} className="min-w-0 flex-1">
+                    <p className="font-semibold">
+                      {getCategory(r.categoryId)?.name} in {r.suburb}
+                    </p>
+                    <p className="truncate text-sm text-muted">{r.description}</p>
+                    <p className={`text-xs font-medium ${done ? 'text-brand-700' : 'text-marigold-700'}`}>
+                      {done ? `Sent to all ${r.providerIds.length}` : `${r.sentTo.length} of ${r.providerIds.length} sent`} ·{' '}
+                      {formatDate(r.createdAt)}
+                    </p>
+                  </Link>
+                  <button
+                    onClick={() => deleteRequest(r.id)}
+                    className="rounded-lg p-2 text-faint hover:bg-sunken hover:text-ink"
+                    aria-label="Delete request"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                  <ChevronRight className="size-5 text-faint" aria-hidden />
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
+      {requests.length === 0 && (
+        <Link to="/request" className="card mt-10 flex items-center gap-3 p-4 transition hover:border-brand-500">
+          <MessageSquareQuote className="size-6 text-marigold-500" aria-hidden />
+          <span className="flex-1">
+            <span className="block font-semibold">Get quotes from up to 3 fundis</span>
+            <span className="text-sm text-muted">Describe the job once and send it to each on WhatsApp.</span>
+          </span>
+          <ChevronRight className="size-5 text-faint" aria-hidden />
+        </Link>
+      )}
 
       {recentProviders.data && recentProviders.data.length > 0 && (
         <section className="mt-10">

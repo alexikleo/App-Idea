@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Plus, X } from 'lucide-react'
 import CategoryIcon from '../components/CategoryIcon'
 import { CATEGORIES, PROVINCES, getCategory } from '../data/categories'
+import StrengthMeter from '../components/StrengthMeter'
 import { createProvider, priceStatsSync } from '../lib/api'
+import { recordMyListing } from '../lib/myFundis'
+import { listingStrength } from '../lib/strength'
 import { PRICE_UNIT_OPTIONS, formatPrice, normalisePhone } from '../lib/format'
 import type { PriceUnit, Province } from '../types'
 
@@ -109,6 +112,7 @@ export default function JoinPage() {
       yearsExperience: Number(years) || 0,
       available24h,
     })
+    recordMyListing(created.id)
     navigate(`/providers/${created.id}`)
   }
 
@@ -277,6 +281,19 @@ export default function JoinPage() {
                   </li>
                 ))}
               </ul>
+            </div>
+            <div className="rounded-2xl border border-line p-4">
+              <StrengthMeter
+                result={listingStrength({
+                  businessName,
+                  bio,
+                  whatsapp: whatsappSame ? phone : whatsapp,
+                  yearsExperience: Number(years) || 0,
+                  suburbs: suburbs.split(',').map((x) => x.trim()).filter(Boolean),
+                  services: services.map((x) => ({ name: x.name, unit: x.unit, price: Number(x.price) })),
+                })}
+              />
+              <p className="mt-3 text-xs text-faint">Use Back to add anything missing before you publish.</p>
             </div>
             <label className="flex items-start gap-2 rounded-xl bg-canvas p-3 text-sm">
               <input type="checkbox" className="mt-1" checked={consent} onChange={(e) => setConsent(e.target.checked)} />

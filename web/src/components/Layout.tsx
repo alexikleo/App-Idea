@@ -3,6 +3,8 @@ import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useMyFundis } from '../lib/myFundis'
 import InstallButton from './InstallButton'
+import ShortlistTray from './ShortlistTray'
+import ThemeToggle from './ThemeToggle'
 import { Logo } from './Logo'
 
 const YEAR = new Date().getFullYear()
@@ -16,13 +18,20 @@ const TABS = [
 
 export default function Layout() {
   const { pathname } = useLocation()
-  const { saved } = useMyFundis()
+  const { saved, shortlist } = useMyFundis()
+  const trayVisible = shortlist.length > 0 && pathname !== '/compare' && pathname !== '/request'
 
   useEffect(() => window.scrollTo(0, 0), [pathname])
 
   return (
-    <div className="flex min-h-screen flex-col pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">
-      <header className="sticky top-0 z-30 border-b border-line bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+    <div
+      className={`flex min-h-screen flex-col print:pb-0 ${
+        trayVisible
+          ? 'pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-24'
+          : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0'
+      }`}
+    >
+      <header className="sticky top-0 z-30 border-b border-line print:hidden bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/" aria-label="Fundi home">
             <Logo />
@@ -49,7 +58,8 @@ export default function Layout() {
               List your business
             </NavLink>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <ThemeToggle />
             <InstallButton />
             <Link
               to="/emergency"
@@ -66,7 +76,7 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      <footer className="hidden border-t border-line bg-surface md:block">
+      <footer className="hidden border-t border-line bg-surface md:block print:hidden">
         <div className="mx-auto flex max-w-6xl justify-between gap-4 px-4 py-6 text-sm text-muted">
           <p>© {YEAR} Fundi · Trusted local services across South Africa</p>
           <div className="flex gap-4">
@@ -81,8 +91,10 @@ export default function Layout() {
         </div>
       </footer>
 
+      <ShortlistTray />
+
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden print:hidden"
         aria-label="Main"
       >
         <div className="grid grid-cols-4">

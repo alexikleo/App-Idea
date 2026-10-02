@@ -5,7 +5,7 @@ import type { Provider } from '../types'
 export default function ContactButtons({ provider, compact = false }: { provider: Provider; compact?: boolean }) {
   const size = compact ? 'py-2 text-sm' : 'py-3'
   return (
-    <div className={`flex gap-2 ${compact ? '' : 'flex-col'}`}>
+    <div className={`flex gap-2 ${compact ? 'flex-wrap' : 'flex-col'}`}>
       <a href={`tel:${provider.phone}`} className={`btn-primary flex-1 whitespace-nowrap ${size}`}>
         <Phone className="size-4" aria-hidden />
         {compact ? 'Call' : formatPhone(provider.phone)}

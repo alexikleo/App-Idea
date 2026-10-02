@@ -20,3 +20,11 @@ The prototype runs on sample data; anything you add (listings, reviews) is saved
 | Quote checker | Need help now | Search |
 | --- | --- | --- |
 | ![Quote checker](docs/screenshots/check-result-m.png) | ![Emergency](docs/screenshots/emergency-m.png) | ![Search](docs/screenshots/search-m.png) |
+
+| Compare | Get quotes | QR card for providers |
+| --- | --- | --- |
+| ![Compare](docs/screenshots/compare.png) | ![Get quotes](docs/screenshots/request-quotes.png) | ![QR card](docs/screenshots/qr-card.png) |
+
+| Dark mode |
+| --- |
+| ![Dark mode](docs/screenshots/dark-home.png) |

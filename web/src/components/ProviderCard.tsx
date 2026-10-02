@@ -5,8 +5,10 @@ import { startingPrice } from '../lib/api'
 import { formatPrice } from '../lib/format'
 import type { Provider } from '../types'
 import Avatar from './Avatar'
+import Badges from './Badges'
 import ContactButtons from './ContactButtons'
 import SaveButton from './SaveButton'
+import ShortlistButton from './ShortlistButton'
 import { StarRating } from './StarRating'
 
 export default function ProviderCard({ provider, categoryId }: { provider: Provider; categoryId?: string }) {
@@ -58,6 +60,13 @@ export default function ProviderCard({ provider, categoryId }: { provider: Provi
           )}
         </div>
       )}
+
+      <div className="flex items-center justify-between gap-2">
+        <Badges badges={provider.badges.filter((b) => b.kind !== 'experienced')} compact />
+        <span className="ml-auto">
+          <ShortlistButton providerId={provider.id} />
+        </span>
+      </div>
 
       <ContactButtons provider={provider} compact />
     </article>

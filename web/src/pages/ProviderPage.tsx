@@ -1,18 +1,22 @@
-import { ArrowLeft, BadgeCheck, Calendar, Camera, Clock, Lightbulb, MapPin, Star, UserX, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Calendar, Camera, Clock, Lightbulb, MapPin, QrCode, Star, Store, UserX, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
+import Badges from '../components/Badges'
 import CategoryIcon from '../components/CategoryIcon'
 import ContactButtons from '../components/ContactButtons'
 import SaveButton from '../components/SaveButton'
 import ShareButton from '../components/ShareButton'
+import ShortlistButton from '../components/ShortlistButton'
+import StrengthMeter from '../components/StrengthMeter'
 import { StarInput, StarRating, Stars } from '../components/StarRating'
 import { EmptyState, Loading } from '../components/States'
 import { REVIEW_TAGS, getCategory } from '../data/categories'
 import { addReview, getProvider, listReviews, priceStatsSync } from '../lib/api'
 import { formatDate, formatPrice, formatRand } from '../lib/format'
 import { resizeImage } from '../lib/images'
-import { recordView } from '../lib/myFundis'
+import { recordView, useMyFundis } from '../lib/myFundis'
+import { listingStrength } from '../lib/strength'
 import { useAsync } from '../lib/useAsync'
 import type { Provider, Review, ReviewTag, ServiceOffering } from '../types'
 
@@ -79,6 +83,7 @@ export default function ProviderPage() {
   const provider = useAsync(() => getProvider(id), [id])
   const reviews = useAsync(() => listReviews(id), [id])
   const [photo, setPhoto] = useState<string | null>(null)
+  const { isMyListing } = useMyFundis()
 
   useEffect(() => {
     if (provider.data) recordView(provider.data.id)
@@ -146,6 +151,11 @@ export default function ProviderPage() {
                 <Calendar className="size-3.5" aria-hidden /> On Fundi since {formatDate(p.joinedAt)}
               </span>
             </div>
+            {p.badges.length > 0 && (
+              <div className="mt-3">
+                <Badges badges={p.badges.filter((b) => b.kind !== 'experienced')} />
+              </div>
+            )}
             {p.topTags.length > 0 && (
               <p className="mt-4 text-sm">
                 <span className="font-semibold">Customers say: </span>
@@ -153,11 +163,30 @@ export default function ProviderPage() {
               </p>
             )}
             <p className="mt-3 max-w-prose leading-relaxed">{p.bio}</p>
-            <div className="mt-5 flex gap-2">
+            <div className="mt-5 flex flex-wrap gap-2">
               <SaveButton providerId={p.id} withLabel />
+              <ShortlistButton providerId={p.id} size="md" />
               <ShareButton provider={p} />
             </div>
           </section>
+
+          {isMyListing(p.id) && (
+            <section className="card space-y-4 border-brand-500 p-5 sm:p-6">
+              <div className="flex items-center gap-2">
+                <Store className="size-5 text-brand-600" aria-hidden />
+                <h2 className="text-xl font-bold">Your listing</h2>
+              </div>
+              <StrengthMeter
+                result={listingStrength({ ...p, suburbs: p.location.suburbs })}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Link to={`/providers/${p.id}/card`} className="btn-primary">
+                  <QrCode className="size-4" aria-hidden /> Get your QR card
+                </Link>
+              </div>
+              <p className="text-xs text-faint">Editing your listing arrives with accounts (Phase 2).</p>
+            </section>
+          )}
 
           <section className="card p-5 sm:p-6">
             <h2 className="text-xl font-bold">Services &amp; prices</h2>
@@ -255,6 +284,11 @@ export default function ProviderPage() {
             <Lightbulb className="size-4 shrink-0" aria-hidden />
             Always confirm the call-out fee and get a written quote before work starts.
           </p>
+          {!isMyListing(p.id) && (
+            <Link to={`/providers/${p.id}/card`} className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink">
+              <QrCode className="size-3.5" aria-hidden /> Is this your business? Get your QR card
+            </Link>
+          )}
         </aside>
 
         <div className="card space-y-1 p-4 text-sm lg:hidden">
@@ -262,6 +296,11 @@ export default function ProviderPage() {
             <MapPin className="size-4 text-brand-600" aria-hidden /> {p.location.city}, {p.location.province}
           </p>
           {p.location.suburbs.length > 0 && <p className="text-muted">Serves {p.location.suburbs.join(', ')}</p>}
+          {!isMyListing(p.id) && (
+            <Link to={`/providers/${p.id}/card`} className="flex items-center gap-1.5 pt-2 text-xs font-medium text-muted">
+              <QrCode className="size-3.5" aria-hidden /> Is this your business? Get your QR card
+            </Link>
+          )}
         </div>
       </div>
 
@@ -397,7 +436,7 @@ function ReviewForm({ provider, onSubmitted }: { provider: Provider; onSubmitted
             <button
               type="button"
               onClick={() => setPhotos((p) => p.filter((_, j) => j !== i))}
-              className="absolute -right-1.5 -top-1.5 rounded-full bg-ink p-0.5 text-white"
+              className="absolute -right-1.5 -top-1.5 rounded-full bg-ink p-0.5 text-canvas"
               aria-label="Remove photo"
             >
               <X className="size-3.5" />

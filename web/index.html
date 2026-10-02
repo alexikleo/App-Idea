@@ -7,6 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0d4a3a" />
     <meta name="description" content="Find trusted plumbers, electricians, solar installers and more across South Africa. Compare real prices and ratings, then call or WhatsApp directly." />
+    <script>
+      try {
+        var t = localStorage.getItem('fundi:theme')
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
     <title>Fundi – Find trusted local services in SA</title>
   </head>
   <body>

@@ -104,13 +104,19 @@ so swapping the in-memory mock for Supabase is a one-file change.
 - [x] Installable PWA: manifest, app icons, offline support, home-screen shortcuts
 - [x] Live on GitHub Pages, auto-deployed on every push
 
-### Next polish round (candidates)
-- [ ] Request quotes from several fundis at once (one job description, WhatsApp to each)
-- [ ] Compare 2–3 fundis side by side
-- [ ] Earned badges: *Top rated in {city}*, *Best value*, *Quick to respond*
-- [ ] Provider QR code / share card for bakkies and flyers
-- [ ] Profile strength meter for providers
-- [ ] Dark mode (colours are already tokens)
+### ✅ Phase 1.6: Second polish round (done)
+- [x] **Shortlist** up to 3 fundis from any card or profile, with a floating tray
+- [x] **Compare side by side**: rating, badges, experience, areas and every price, best in each row marked
+- [x] **Get quotes**: describe the job once, send a pre-written WhatsApp (or SMS) to each fundi, track who's been sent, saved under My Fundis
+- [x] **Earned badges**: Top rated {trade} in {city}, Best value (% below market), 10+ years
+- [x] **QR business card** for providers: downloadable PNG card, QR-only image, print
+- [x] **Listing strength meter** on sign-up and on the provider's own listing
+- [x] **Dark mode**: follows the phone's setting, with a toggle in the header
+
+### Later polish ideas
+- [ ] "Quick to respond" badge (needs reply tracking, so after Phase 2)
+- [ ] Before/after work gallery on profiles
+- [ ] Afrikaans / isiZulu / isiXhosa translations
 
 ### Phase 2: Real backend
 - [ ] Supabase project, SQL migrations for the schema above, seed categories
