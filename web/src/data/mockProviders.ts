@@ -3,7 +3,7 @@ import type { Provider, Review } from '../types'
 // Sample data for the UI skeleton only. Names and numbers are fictional.
 // ratingAvg / ratingCount / topTags are recomputed from MOCK_REVIEWS in the data layer.
 
-type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags' | 'badges'>
+export type SeedProvider = Omit<Provider, 'ratingAvg' | 'ratingCount' | 'topTags' | 'badges' | 'isMine'>
 
 export const MOCK_PROVIDERS: SeedProvider[] = [
   {

@@ -118,16 +118,23 @@ so swapping the in-memory mock for Supabase is a one-file change.
 - [ ] Before/after work gallery on profiles
 - [ ] Afrikaans / isiZulu / isiXhosa translations
 
-### Phase 2: Real backend
-- [ ] Supabase project, SQL migrations for the schema above, seed categories
-- [ ] Row-Level Security: anyone can read; providers edit only their own listing; reviewers edit only their own reviews
-- [ ] Phone OTP login (SMS) for providers and reviewers
-- [ ] Replace `lib/api.ts` internals with Supabase queries; add TanStack Query for caching
-- [ ] Provider dashboard: edit profile, prices, and availability
-- [ ] Profile photo and work-gallery uploads (Storage)
+### ✅ Phase 2: Real backend (built, waiting on your Supabase project)
+- [x] Supabase schema in `supabase/migrations`: listings, services, categories, reviews, profiles, photo storage
+- [x] Row-level security plus column-level grants: anyone reads; owners edit only their own listing; one review per customer per fundi; no self-reviews; ratings and Verified can't be self-set
+- [x] Ratings kept in sync by a database trigger; one-transaction `upsert_my_listing` RPC
+- [x] 46 automated security tests on real Postgres (`supabase/tests`), run on every push by GitHub Actions
+- [x] Sign-in with a 6-digit code (email now; SMS once an SMS provider is connected)
+- [x] Data layer switches to Supabase when configured; otherwise demo mode on sample data
+- [x] Provider dashboard: edit profile, photo, services, prices, area and 24/7 availability
+- [x] Sign-up and reviews require an account; display name on reviews; account page
+- [x] Profile and review photo uploads to Supabase Storage
+- [ ] **You:** create the Supabase project and connect it ([docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md))
+- [ ] Custom SMTP (and later SMS) sender before launch
+- [ ] Move My Fundis (saved, shortlist, quote requests) from the device to the account
 
 ### Phase 3: Trust & quality
-- [ ] One review per user per provider; reviewers must be logged in with a verified phone
+- [x] One review per user per provider; reviewers must be logged in (done in Phase 2)
+- [ ] Admin screen: verify fundis, hide listings/reviews (database functions already exist)
 - [ ] Report or flag reviews and listings, plus an admin moderation queue
 - [ ] Verification flow: upload registration/ID, admin approves, "Verified" badge
 - [ ] Providers can reply to reviews
@@ -161,7 +168,9 @@ so swapping the in-memory mock for Supabase is a one-file change.
 ```bash
 cd web
 npm install
-npm run dev     # http://localhost:5173
-npm run build   # typecheck + production build
+npm run dev         # http://localhost:5173 (demo mode unless .env.local has Supabase keys)
+npm run build       # typecheck + production build
 npm run lint
+npm run test:unit   # data mapping tests
+npm run test:db     # migrations + security tests (needs a local Postgres; see supabase/tests/run.sh)
 ```

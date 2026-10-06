@@ -18,7 +18,7 @@ export default function ProviderCard({ provider, categoryId }: { provider: Provi
   return (
     <article className="card flex min-w-0 animate-rise flex-col gap-4 p-4 transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-900/5">
       <Link to={`/providers/${provider.id}`} className="flex items-start gap-3">
-        <Avatar id={provider.id} name={provider.name} />
+        <Avatar id={provider.id} name={provider.name} photoUrl={provider.photoUrl} />
         <div className="min-w-0 flex-1">
           <h3 className="line-clamp-2 text-lg font-bold leading-tight">
             {provider.businessName ?? provider.name}

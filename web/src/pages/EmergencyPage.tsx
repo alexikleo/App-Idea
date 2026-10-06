@@ -109,7 +109,7 @@ export default function EmergencyPage() {
             return (
               <article key={p.id} className="card animate-rise p-4">
                 <Link to={`/providers/${p.id}`} className="flex items-start gap-3">
-                  <Avatar id={p.id} name={p.name} />
+                  <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-2 text-lg font-bold leading-tight">
                       {p.businessName ?? p.name}

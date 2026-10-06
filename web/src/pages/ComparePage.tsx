@@ -109,7 +109,7 @@ export default function ComparePage() {
                 {list.map((p) => (
                   <th key={p.id} scope="col" className="w-1/3 px-3 pb-3 text-left align-top font-normal">
                     <div className="flex items-start justify-between gap-2">
-                      <Avatar id={p.id} name={p.name} />
+                      <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
                       <button
                         onClick={() => toggleShortlist(p.id)}
                         className="rounded-full p-1 text-faint hover:bg-sunken hover:text-ink"

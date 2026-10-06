@@ -51,6 +51,10 @@ export interface Provider {
   verified: boolean
   available24h: boolean
   joinedAt: string
+  /** Profile photo (public URL). */
+  photoUrl?: string
+  /** True when the signed-in user owns this listing. */
+  isMine: boolean
   /** Denormalised from reviews for fast listing/sorting. */
   ratingAvg: number
   ratingCount: number
@@ -77,6 +81,8 @@ export interface Review {
   /** Data URLs in the prototype; storage URLs once a backend exists. */
   photos?: string[]
   createdAt: string
+  /** True when the signed-in user wrote this review. */
+  isMine?: boolean
 }
 
 export type ReviewTag = 'on_time' | 'tidy' | 'fair_price' | 'communication' | 'quality' | 'friendly'
@@ -91,4 +97,31 @@ export interface ProviderSearch {
   minRating?: number
   maxPrice?: number
   sort?: SortOption
+}
+
+/** What a provider fills in to create or edit their listing. */
+export interface ListingInput {
+  name: string
+  businessName?: string
+  bio: string
+  phone: string
+  whatsapp?: string
+  categoryIds: string[]
+  services: Omit<ServiceOffering, 'id'>[]
+  location: Location
+  yearsExperience: number
+  available24h: boolean
+  photoUrl?: string
+}
+
+export interface NewReview {
+  providerId: string
+  authorName: string
+  rating: 1 | 2 | 3 | 4 | 5
+  comment: string
+  tags?: ReviewTag[]
+  /** Data URLs straight from the photo picker; uploaded by the data layer. */
+  photos?: string[]
+  serviceName?: string
+  pricePaid?: number
 }

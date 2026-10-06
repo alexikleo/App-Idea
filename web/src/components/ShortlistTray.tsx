@@ -29,7 +29,7 @@ export default function ShortlistTray() {
               className="group relative rounded-2xl ring-2 ring-brand-900"
               aria-label={`Remove ${p.businessName ?? p.name} from shortlist`}
             >
-              <Avatar id={p.id} name={p.name} />
+              <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
               <span className="absolute -right-1 -top-1 hidden rounded-full bg-alert-500 p-0.5 group-hover:block">
                 <X className="size-3" />
               </span>

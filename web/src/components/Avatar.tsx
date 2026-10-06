@@ -14,7 +14,17 @@ function hash(s: string) {
   return h
 }
 
-export default function Avatar({ id, name, size = 'md' }: { id: string; name: string; size?: 'md' | 'lg' }) {
+export default function Avatar({
+  id,
+  name,
+  photoUrl,
+  size = 'md',
+}: {
+  id: string
+  name: string
+  photoUrl?: string
+  size?: 'md' | 'lg'
+}) {
   const initials = name
     .split(' ')
     .map((n) => n[0])
@@ -22,6 +32,7 @@ export default function Avatar({ id, name, size = 'md' }: { id: string; name: st
     .join('')
     .toUpperCase()
   const dims = size === 'lg' ? 'size-20 text-2xl rounded-3xl' : 'size-12 text-base rounded-2xl'
+  if (photoUrl) return <img src={photoUrl} alt="" className={`shrink-0 object-cover ${dims}`} loading="lazy" />
   return (
     <div className={`grid shrink-0 place-items-center font-display font-bold ${dims} ${PALETTES[hash(id) % PALETTES.length]}`}>
       {initials}

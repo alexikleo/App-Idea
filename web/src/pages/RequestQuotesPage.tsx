@@ -98,7 +98,7 @@ function DetailsStep() {
                         on ? 'border-brand-600 bg-brand-50' : 'border-line hover:border-brand-500'
                       }`}
                     >
-                      <Avatar id={p.id} name={p.name} />
+                      <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold leading-tight">{p.businessName ?? p.name}</p>
                         <StarRating value={p.ratingAvg} count={p.ratingCount} />
@@ -221,7 +221,7 @@ function SendStep({ request }: { request: QuoteRequest }) {
           return (
             <li key={p.id} className="card p-4">
               <div className="flex items-center gap-3">
-                <Avatar id={p.id} name={p.name} />
+                <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
                 <div className="min-w-0 flex-1">
                   <Link to={`/providers/${p.id}`} className="font-semibold leading-tight hover:underline">
                     {p.businessName ?? p.name}
@@ -298,7 +298,7 @@ function ProviderList({ providers }: { providers: Provider[] }) {
     <ul className="space-y-2">
       {providers.map((p) => (
         <li key={p.id} className="flex items-center gap-3 rounded-xl bg-canvas p-3">
-          <Avatar id={p.id} name={p.name} />
+          <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} />
           <div className="min-w-0 flex-1">
             <p className="font-semibold leading-tight">{p.businessName ?? p.name}</p>
             <StarRating value={p.ratingAvg} count={p.ratingCount} />

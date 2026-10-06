@@ -1,6 +1,6 @@
-import { ArrowLeft, BadgeCheck, Calendar, Camera, Clock, Lightbulb, MapPin, QrCode, Star, Store, UserX, X } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, Calendar, Camera, Clock, LayoutDashboard, Lightbulb, LogIn, MapPin, PartyPopper, QrCode, Star, Store, UserX, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import Avatar from '../components/Avatar'
 import Badges from '../components/Badges'
 import CategoryIcon from '../components/CategoryIcon'
@@ -12,10 +12,11 @@ import StrengthMeter from '../components/StrengthMeter'
 import { StarInput, StarRating, Stars } from '../components/StarRating'
 import { EmptyState, Loading } from '../components/States'
 import { REVIEW_TAGS, getCategory } from '../data/categories'
-import { addReview, getProvider, listReviews, priceStatsSync } from '../lib/api'
+import { type PriceStat, addReview, getAllPriceStats, getProvider, listReviews } from '../lib/api'
 import { formatDate, formatPrice, formatRand } from '../lib/format'
 import { resizeImage } from '../lib/images'
-import { recordView, useMyFundis } from '../lib/myFundis'
+import { useAuth } from '../lib/authContext'
+import { recordView } from '../lib/myFundis'
 import { listingStrength } from '../lib/strength'
 import { useAsync } from '../lib/useAsync'
 import type { Provider, Review, ReviewTag, ServiceOffering } from '../types'
@@ -23,8 +24,8 @@ import type { Provider, Review, ReviewTag, ServiceOffering } from '../types'
 const tagLabel = (t: ReviewTag) => REVIEW_TAGS.find((r) => r.id === t)?.label ?? t
 
 /** Compares a price to the market average for the same service name. */
-function PriceBadge({ service }: { service: ServiceOffering }) {
-  const stat = priceStatsSync(service.categoryId).find((s) => s.serviceName === service.name)
+function PriceBadge({ service, stats }: { service: ServiceOffering; stats?: Record<string, PriceStat[]> }) {
+  const stat = stats?.[service.categoryId]?.find((s) => s.serviceName === service.name)
   if (!stat || stat.count < 2 || service.price <= 0) return null
   const diff = (service.price - stat.avg) / stat.avg
   if (Math.abs(diff) < 0.05) return <span className="chip">Market average</span>
@@ -80,14 +81,23 @@ function RatingSummary({ provider, reviews }: { provider: Provider; reviews: Rev
 
 export default function ProviderPage() {
   const { id = '' } = useParams()
-  const provider = useAsync(() => getProvider(id), [id])
-  const reviews = useAsync(() => listReviews(id), [id])
+  const { user: authUser } = useAuth()
+  const provider = useAsync(() => getProvider(id), [id, authUser?.id])
+  const reviews = useAsync(() => listReviews(id), [id, authUser?.id])
+  const { data: priceStats } = useAsync(getAllPriceStats, [id])
   const [photo, setPhoto] = useState<string | null>(null)
-  const { isMyListing } = useMyFundis()
+  const [params] = useSearchParams()
+  const { hash } = useLocation()
+  const user = authUser
 
   useEffect(() => {
     if (provider.data) recordView(provider.data.id)
   }, [provider.data])
+
+  // Links like /providers/x#reviews (e.g. after signing in to review) land on the reviews.
+  useEffect(() => {
+    if (hash === '#reviews' && provider.data) document.getElementById('reviews')?.scrollIntoView({ block: 'start' })
+  }, [hash, provider.data])
 
   if (provider.loading && !provider.data) return <Loading />
   if (!provider.data)
@@ -121,7 +131,7 @@ export default function ProviderPage() {
         <div className="min-w-0 space-y-5">
           <section className="card p-5 sm:p-6">
             <div className="flex items-start gap-4">
-              <Avatar id={p.id} name={p.name} size="lg" />
+              <Avatar id={p.id} name={p.name} photoUrl={p.photoUrl} size="lg" />
               <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-extrabold leading-tight sm:text-3xl">
                   {p.businessName ?? p.name}
@@ -170,21 +180,30 @@ export default function ProviderPage() {
             </div>
           </section>
 
-          {isMyListing(p.id) && (
+          {p.isMine && (
             <section className="card space-y-4 border-brand-500 p-5 sm:p-6">
+              {params.get('welcome') && (
+                <p className="flex items-start gap-2 rounded-xl bg-brand-100 p-3 text-sm text-brand-700">
+                  <PartyPopper className="size-5 shrink-0" aria-hidden />
+                  <span>
+                    <b>You’re live on Fundi.</b> This is what customers see. Share your QR card so happy customers can find and
+                    review you.
+                  </span>
+                </p>
+              )}
               <div className="flex items-center gap-2">
                 <Store className="size-5 text-brand-600" aria-hidden />
                 <h2 className="text-xl font-bold">Your listing</h2>
               </div>
-              <StrengthMeter
-                result={listingStrength({ ...p, suburbs: p.location.suburbs })}
-              />
+              <StrengthMeter result={listingStrength({ ...p, suburbs: p.location.suburbs })} />
               <div className="flex flex-wrap gap-2">
-                <Link to={`/providers/${p.id}/card`} className="btn-primary">
+                <Link to="/dashboard" className="btn-primary">
+                  <LayoutDashboard className="size-4" aria-hidden /> Edit listing
+                </Link>
+                <Link to={`/providers/${p.id}/card`} className="btn-outline">
                   <QrCode className="size-4" aria-hidden /> Get your QR card
                 </Link>
               </div>
-              <p className="text-xs text-faint">Editing your listing arrives with accounts (Phase 2).</p>
             </section>
           )}
 
@@ -204,7 +223,7 @@ export default function ProviderPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <PriceBadge service={s} />
+                    <PriceBadge service={s} stats={priceStats} />
                     <span className="font-display text-lg font-bold tabular-nums">{formatPrice(s.price, s.unit)}</span>
                   </div>
                 </li>
@@ -212,7 +231,7 @@ export default function ProviderPage() {
             </ul>
           </section>
 
-          <section className="card p-5 sm:p-6">
+          <section id="reviews" className="card scroll-mt-24 p-5 sm:p-6">
             <h2 className="text-xl font-bold">Reviews</h2>
             {reviews.loading && !reviews.data ? (
               <div className="skeleton mt-4 h-32 w-full" />
@@ -232,6 +251,7 @@ export default function ProviderPage() {
                             {r.authorName[0]}
                           </span>
                           <span className="font-semibold">{r.authorName}</span>
+                          {r.isMine && <span className="chip bg-brand-100 text-brand-700">Your review</span>}
                         </div>
                         <span className="text-xs text-faint">{formatDate(r.createdAt)}</span>
                       </div>
@@ -267,7 +287,15 @@ export default function ProviderPage() {
                 </ul>
               </>
             )}
-            <ReviewForm provider={p} onSubmitted={reload} />
+            {p.isMine ? null : user ? (
+              reviews.data?.some((r) => r.isMine) ? (
+                <p className="mt-5 rounded-xl bg-canvas p-3 text-sm text-muted">Thanks, you’ve reviewed this fundi.</p>
+              ) : (
+                <ReviewForm provider={p} onSubmitted={reload} />
+              )
+            ) : (
+              <SignInToReview />
+            )}
           </section>
         </div>
 
@@ -284,11 +312,6 @@ export default function ProviderPage() {
             <Lightbulb className="size-4 shrink-0" aria-hidden />
             Always confirm the call-out fee and get a written quote before work starts.
           </p>
-          {!isMyListing(p.id) && (
-            <Link to={`/providers/${p.id}/card`} className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink">
-              <QrCode className="size-3.5" aria-hidden /> Is this your business? Get your QR card
-            </Link>
-          )}
         </aside>
 
         <div className="card space-y-1 p-4 text-sm lg:hidden">
@@ -296,11 +319,6 @@ export default function ProviderPage() {
             <MapPin className="size-4 text-brand-600" aria-hidden /> {p.location.city}, {p.location.province}
           </p>
           {p.location.suburbs.length > 0 && <p className="text-muted">Serves {p.location.suburbs.join(', ')}</p>}
-          {!isMyListing(p.id) && (
-            <Link to={`/providers/${p.id}/card`} className="flex items-center gap-1.5 pt-2 text-xs font-medium text-muted">
-              <QrCode className="size-3.5" aria-hidden /> Is this your business? Get your QR card
-            </Link>
-          )}
         </div>
       </div>
 
@@ -321,10 +339,20 @@ export default function ProviderPage() {
   )
 }
 
+function SignInToReview() {
+  const { pathname } = useLocation()
+  return (
+    <Link to={`/signin?next=${encodeURIComponent(pathname + '#reviews')}`} className="btn-outline mt-5 w-full border-brand-600 text-brand-700">
+      <LogIn className="size-4" aria-hidden /> Sign in to write a review
+    </Link>
+  )
+}
+
 function ReviewForm({ provider, onSubmitted }: { provider: Provider; onSubmitted: () => void }) {
+  const { user, setDisplayName } = useAuth()
   const [open, setOpen] = useState(false)
   const [rating, setRating] = useState<0 | 1 | 2 | 3 | 4 | 5>(0)
-  const [authorName, setAuthorName] = useState('')
+  const [authorName, setAuthorName] = useState(user?.displayName ?? '')
   const [comment, setComment] = useState('')
   const [tags, setTags] = useState<ReviewTag[]>([])
   const [photos, setPhotos] = useState<string[]>([])
@@ -359,16 +387,24 @@ function ReviewForm({ provider, onSubmitted }: { provider: Provider; onSubmitted
         if (!authorName.trim() || comment.trim().length < 10)
           return setError('Add your name and a comment of at least 10 characters.')
         setSaving(true)
-        await addReview({
-          providerId: provider.id,
-          rating,
-          authorName: authorName.trim(),
-          comment: comment.trim(),
-          tags: tags.length ? tags : undefined,
-          photos: photos.length ? photos : undefined,
-          serviceName: serviceName || undefined,
-          pricePaid: pricePaid ? Number(pricePaid) : undefined,
-        })
+        try {
+          await addReview({
+            providerId: provider.id,
+            rating,
+            authorName: authorName.trim(),
+            comment: comment.trim(),
+            tags: tags.length ? tags : undefined,
+            photos: photos.length ? photos : undefined,
+            serviceName: serviceName || undefined,
+            pricePaid: pricePaid ? Number(pricePaid) : undefined,
+          })
+          // Remember the name for next time.
+          if (!user?.displayName) await setDisplayName(authorName).catch(() => {})
+        } catch (err) {
+          setError((err as Error).message)
+          setSaving(false)
+          return
+        }
         setSaving(false)
         setOpen(false)
         setRating(0)

@@ -5,13 +5,15 @@ import { EmptyState, Loading } from '../components/States'
 import { getProvider } from '../lib/api'
 import { qrDataUrl, renderBusinessCard } from '../lib/businessCard'
 import { providerUrl } from '../lib/share'
+import { useAuth } from '../lib/authContext'
 import { useAsync } from '../lib/useAsync'
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 export default function BusinessCardPage() {
   const { id = '' } = useParams()
-  const { data: provider, loading } = useAsync(() => getProvider(id), [id])
+  const { user } = useAuth()
+  const { data: provider, loading } = useAsync(() => getProvider(id), [id, user?.id])
   const [card, setCard] = useState<string>()
   const [qr, setQr] = useState<string>()
 
@@ -27,6 +29,14 @@ export default function BusinessCardPage() {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10">
         <EmptyState icon={UserX} title="We couldn’t find that fundi" />
+      </div>
+    )
+  if (!provider.isMine)
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-10">
+        <EmptyState icon={QrCode} title="Only the owner of this listing can get its QR card">
+          If this is your business, sign in with the account you used to list it.
+        </EmptyState>
       </div>
     )
 

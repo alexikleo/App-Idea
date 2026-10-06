@@ -1,6 +1,6 @@
-// "My Fundis": saved providers, recently viewed, the compare/quote shortlist,
-// sent quote requests and listings created on this device.
-// Moves to the user's account once logins exist (Phase 2).
+// "My Fundis": saved providers, recently viewed, the compare/quote shortlist
+// and sent quote requests, kept on this device.
+// Syncing these to the signed-in account is a later step; for now they stay on this device.
 
 import { useSyncExternalStore } from 'react'
 
@@ -27,10 +27,9 @@ interface State {
   recent: string[]
   shortlist: string[]
   requests: QuoteRequest[]
-  myListings: string[]
 }
 
-const EMPTY: State = { saved: [], recent: [], shortlist: [], requests: [], myListings: [] }
+const EMPTY: State = { saved: [], recent: [], shortlist: [], requests: [] }
 
 function read(): State {
   try {
@@ -93,16 +92,10 @@ export function useMyFundis() {
         ),
       }),
     deleteRequest: (requestId: string) => write({ ...state, requests: state.requests.filter((r) => r.id !== requestId) }),
-
-    isMyListing: (id: string) => s.myListings.includes(id),
   }
 }
 
 export function recordView(id: string) {
   if (state.recent[0] === id) return
   write({ ...state, recent: [id, ...state.recent.filter((r) => r !== id)].slice(0, MAX_RECENT) })
-}
-
-export function recordMyListing(id: string) {
-  write({ ...state, myListings: [id, ...state.myListings] })
 }

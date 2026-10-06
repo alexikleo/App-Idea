@@ -6,12 +6,13 @@ Compare listed prices and ratings, then call or WhatsApp the provider directly.
 - **Plan & roadmap:** [PLAN.md](./PLAN.md)
 - **Live prototype:** https://alexikleo.github.io/App-Idea/
 - **Web app source:** [`web/`](./web)
+- **Database (Supabase):** [`supabase/`](./supabase) · setup guide: [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)
 
 ```bash
 cd web && npm install && npm run dev
 ```
 
-The prototype runs on sample data; anything you add (listings, reviews) is saved in your browser only.
+Without a Supabase project connected, the app runs in **demo mode** on sample data, and anything you add is saved in your browser only. Demo sign-in accepts any email with the code `123456`.
 
 | Home | Provider profile |
 | --- | --- |

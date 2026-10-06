@@ -1,6 +1,8 @@
-import { Calculator, Heart, House, Search, Siren } from 'lucide-react'
+import { Calculator, Heart, House, Search, Siren, UserRound } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { dataMode } from '../lib/api'
+import { useAuth } from '../lib/authContext'
 import { useMyFundis } from '../lib/myFundis'
 import InstallButton from './InstallButton'
 import ShortlistTray from './ShortlistTray'
@@ -19,6 +21,7 @@ const TABS = [
 export default function Layout() {
   const { pathname } = useLocation()
   const { saved, shortlist } = useMyFundis()
+  const { user } = useAuth()
   const trayVisible = shortlist.length > 0 && pathname !== '/compare' && pathname !== '/request'
 
   useEffect(() => window.scrollTo(0, 0), [pathname])
@@ -60,6 +63,20 @@ export default function Layout() {
           </nav>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <ThemeToggle />
+            <Link
+              to={user ? '/account' : '/signin'}
+              className="grid size-9 place-items-center rounded-xl text-muted transition hover:bg-sunken hover:text-ink"
+              aria-label={user ? 'Your account' : 'Sign in'}
+              title={user ? 'Your account' : 'Sign in'}
+            >
+              {user ? (
+                <span className="grid size-7 place-items-center rounded-full bg-brand-600 text-xs font-bold text-white">
+                  {(user.displayName || user.email || user.phone || '?').replace(/^\+27/, '')[0].toUpperCase()}
+                </span>
+              ) : (
+                <UserRound className="size-5" aria-hidden />
+              )}
+            </Link>
             <InstallButton />
             <Link
               to="/emergency"
@@ -86,7 +103,7 @@ export default function Layout() {
             <Link to="/join" className="hover:text-ink">
               List your business
             </Link>
-            <span>Prototype · sample data</span>
+            {dataMode === 'demo' && <span>Demo mode · sample data</span>}
           </div>
         </div>
       </footer>

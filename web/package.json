@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "node --experimental-strip-types --test tests/*.test.mts",
+    "test:db": "bash ../supabase/tests/run.sh"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
     "@fontsource-variable/figtree": "^5.3.0",
+    "@supabase/supabase-js": "^2.117.2",
     "lucide-react": "^1.49.0",
     "qrcode": "^1.5.4",
     "react": "^19.2.8",

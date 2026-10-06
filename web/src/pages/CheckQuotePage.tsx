@@ -5,7 +5,8 @@ import Avatar from '../components/Avatar'
 import CategoryIcon from '../components/CategoryIcon'
 import { StarRating } from '../components/StarRating'
 import { CATEGORIES, getCategory } from '../data/categories'
-import { type QuoteCheck, type QuoteVerdict, checkQuote, priceStatsSync } from '../lib/api'
+import { type QuoteCheck, type QuoteVerdict, checkQuote, getAllPriceStats } from '../lib/api'
+import { useAsync } from '../lib/useAsync'
 import { formatPrice, formatRand } from '../lib/format'
 
 const VERDICTS: Record<QuoteVerdict, { title: string; text: string; tone: string; icon: typeof CircleCheck }> = {
@@ -77,15 +78,18 @@ function QuoteGauge({ check }: { check: QuoteCheck }) {
 export default function CheckQuotePage() {
   const [params] = useSearchParams()
   const [categoryId, setCategoryId] = useState(params.get('category') ?? 'plumber')
-  const services = priceStatsSync(categoryId)
-  const [serviceName, setServiceName] = useState(params.get('service') ?? services[0]?.serviceName ?? '')
+  const { data: allStats } = useAsync(getAllPriceStats, [])
+  const services = allStats?.[categoryId] ?? []
+  const [chosenService, setServiceName] = useState(params.get('service') ?? '')
+  // Until a service is picked, default to the most common one in the category.
+  const serviceName = services.some((s) => s.serviceName === chosenService) ? chosenService : (services[0]?.serviceName ?? '')
   const [amount, setAmount] = useState('')
   const [result, setResult] = useState<QuoteCheck | null | undefined>(undefined)
   const [checking, setChecking] = useState(false)
 
   const pickCategory = (id: string) => {
     setCategoryId(id)
-    setServiceName(priceStatsSync(id)[0]?.serviceName ?? '')
+    setServiceName('')
     setResult(undefined)
   }
 
@@ -117,7 +121,7 @@ export default function CheckQuotePage() {
         <div className="space-y-2">
           <span className="label">1. What kind of job?</span>
           <div className="flex flex-wrap gap-2">
-            {CATEGORIES.filter((c) => priceStatsSync(c.id).length > 0).map((c) => (
+            {CATEGORIES.filter((c) => allStats?.[c.id]).map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -210,7 +214,7 @@ export default function CheckQuotePage() {
                 {result.cheaper.slice(0, 5).map(({ provider, service }) => (
                   <li key={provider.id}>
                     <Link to={`/providers/${provider.id}`} className="flex items-center gap-3 py-3 transition hover:opacity-80">
-                      <Avatar id={provider.id} name={provider.name} />
+                      <Avatar id={provider.id} name={provider.name} photoUrl={provider.photoUrl} />
                       <div className="min-w-0 flex-1">
                         <p className="line-clamp-2 font-semibold leading-tight">
                           {provider.businessName ?? provider.name}
